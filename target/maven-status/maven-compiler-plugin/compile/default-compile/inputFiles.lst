@@ -1,0 +1,15 @@
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/DemoApplication.java
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/config/SecurityConfig.java
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/config/WebConfig.java
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/controller/ActivityController.java
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/controller/ProjectController.java
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/controller/UserController.java
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/dto/ProjectDTO.java
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/dto/UserRegisterDTO.java
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/entity/Activity.java
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/entity/Project.java
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/entity/Role.java
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/entity/User.java
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/repository/ActivityRepository.java
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/repository/ProjectRepository.java
+/Users/esquizociborgue/Documents/code/time-sheet-ciac/time-schedule-server/src/main/java/com/workschedule/app/repository/UserRepository.java
