@@ -7,9 +7,11 @@ import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -104,7 +106,7 @@ public class ProjectController {
         }
     }
 
-    @PostMapping("/{idUser}/update-project/{idProject}")
+    @PutMapping("/{idUser}/update-project/{idProject}")
     ResponseEntity<Project> updateProject(@PathVariable Long idUser, @PathVariable Long idProject,
             @RequestBody Project newProject) {
         try {
@@ -126,6 +128,17 @@ public class ProjectController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    @DeleteMapping("/{idUser}/projects/{projectId}")
+    public ResponseEntity<Void> deleteProject(@PathVariable Long idUser, @PathVariable Long projectId) {
+        Optional<Project> project = projectRepository.findById(projectId);
+        if (project.isEmpty() || !project.get().getUser().getId().equals(idUser)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        projectRepository.deleteById(projectId);
+        return ResponseEntity.ok().build();
     }
 
     private void handleProjectData(Project project, Project newProject) {

@@ -7,6 +7,8 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.workschedule.app.entity.User;
+
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,6 +33,10 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        User user = (User) userDetails;
+        extraClaims.put("role", user.getRole().name());
+        extraClaims.put("id", user.getId());
+        
         return Jwts
                 .builder()
                 .setClaims(extraClaims)

@@ -32,8 +32,8 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtService jwtService;
     private final UserService userService;
+    private final JwtService jwtService;
 
     @Bean
     public UserDetailsService userDetailsService() {
