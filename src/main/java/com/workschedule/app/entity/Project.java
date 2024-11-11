@@ -1,6 +1,7 @@
 package com.workschedule.app.entity;
 
 import java.util.Date;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +15,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -43,4 +46,6 @@ public class Project {
     @Column(name = "creation_date")
     private Date creationDate;
 
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Activity> activities;
 }
