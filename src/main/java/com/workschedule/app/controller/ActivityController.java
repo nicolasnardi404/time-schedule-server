@@ -18,6 +18,12 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
+import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.ArrayList;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/activities")
@@ -29,13 +35,14 @@ public class ActivityController {
     public ResponseEntity<List<ActivityDTO>> getAllActivities(@PathVariable Long projectId) {
         List<Activity> activities = activityRepository.findAllByProjectId(projectId);
         List<ActivityDTO> activityDTOs = activities.stream()
-            .map(activity -> ActivityDTO.builder()
-                .id(activity.getId())
-                .description(activity.getDescription())
-                .beginning(activity.getBeginning())
-                .end(activity.getEnd())
-                .build())
-            .collect(Collectors.toList());
+                .map(activity -> ActivityDTO.builder()
+                        .id(activity.getId())
+                        .description(activity.getDescription())
+                        .beginning(activity.getBeginning())
+                        .end(activity.getEnd())
+                        .isClosed(activity.isClosed())
+                        .build())
+                .collect(Collectors.toList());
         return ResponseEntity.ok(activityDTOs);
     }
 
@@ -48,7 +55,7 @@ public class ActivityController {
 
     @PostMapping("/project/{projectId}")
     public ResponseEntity<?> createActivity(
-            @PathVariable Long projectId, 
+            @PathVariable Long projectId,
             @RequestBody ActivityDTO activityDTO,
             Authentication authentication) {
         try {
@@ -64,7 +71,7 @@ public class ActivityController {
             // Verify user has access to this project
             if (!project.get().getUser().getUsername().equals(authentication.getName())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "User does not have access to this project"));
+                        .body(Map.of("message", "User does not have access to this project"));
             }
 
             Activity activity = Activity.builder()
@@ -72,6 +79,7 @@ public class ActivityController {
                     .beginning(activityDTO.getBeginning())
                     .end(activityDTO.getEnd())
                     .description(activityDTO.getDescription())
+                    .isClosed(false)
                     .build();
 
             Activity savedActivity = activityRepository.save(activity);
@@ -80,10 +88,9 @@ public class ActivityController {
             System.err.println("Error creating activity: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of(
-                    "message", "Failed to create activity",
-                    "error", e.getMessage()
-                ));
+                    .body(Map.of(
+                            "message", "Failed to create activity",
+                            "error", e.getMessage()));
         }
     }
 
@@ -110,5 +117,95 @@ public class ActivityController {
 
         activityRepository.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/toggle-status")
+    public ResponseEntity<?> toggleActivityStatus(
+            @PathVariable Long id,
+            Authentication authentication) {
+        try {
+            Optional<Activity> activityOpt = activityRepository.findById(id);
+            if (activityOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Activity activity = activityOpt.get();
+
+            // Toggle the status
+            activity.setClosed(!activity.isClosed());
+            Activity updatedActivity = activityRepository.save(activity);
+
+            return ResponseEntity.ok(Map.of(
+                    "id", updatedActivity.getId(),
+                    "isClosed", updatedActivity.isClosed(),
+                    "message", "Activity status updated successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Failed to update activity status"));
+        }
+    }
+
+    // Add a new endpoint to close all activities for a specific month
+    @PutMapping("/project/{projectId}/close-month")
+    public ResponseEntity<?> closeActivitiesForMonth(
+            @PathVariable Long projectId,
+            @RequestParam int year,
+            @RequestParam int month,
+            Authentication authentication) {
+        try {
+            Optional<Project> project = projectRepository.findById(projectId);
+            if (project.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Verify user has access to this project
+            if (!project.get().getUser().getUsername().equals(authentication.getName())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("message", "User does not have access to this project"));
+            }
+
+            // Get all activities for the project
+            List<Activity> activities = activityRepository.findAllByProjectId(projectId);
+
+            // Calculate the start and end dates for the specified month
+            Calendar startCal = Calendar.getInstance();
+            startCal.set(year, month - 1, 1, 0, 0, 0);
+            startCal.set(Calendar.MILLISECOND, 0);
+
+            Calendar endCal = Calendar.getInstance();
+            endCal.set(year, month - 1, 1, 0, 0, 0);
+            endCal.set(Calendar.MILLISECOND, 0);
+            endCal.add(Calendar.MONTH, 1);
+            endCal.add(Calendar.MILLISECOND, -1);
+
+            Date startDate = startCal.getTime();
+            Date endDate = endCal.getTime();
+
+            int updatedCount = 0;
+            List<Activity> updatedActivities = new ArrayList<>();
+
+            // Close all activities that fall within the specified month
+            for (Activity activity : activities) {
+                if (activity.getBeginning().compareTo(startDate) >= 0 &&
+                        activity.getBeginning().compareTo(endDate) <= 0) {
+                    activity.setClosed(true);
+                    updatedActivities.add(activity);
+                    updatedCount++;
+                }
+            }
+
+            // Batch save all updated activities
+            if (!updatedActivities.isEmpty()) {
+                activityRepository.saveAll(updatedActivities);
+            }
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Activities closed successfully",
+                    "updatedCount", updatedCount,
+                    "monthYear", String.format("%d-%02d", year, month)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Failed to close activities"));
+        }
     }
 }
