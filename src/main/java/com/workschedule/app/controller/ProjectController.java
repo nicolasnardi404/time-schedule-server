@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.workschedule.app.dto.ProjectDTO;
@@ -148,5 +149,23 @@ public class ProjectController {
         project.setDescription(newProject.getDescription());
 
         projectRepository.save(project);
+    }
+
+    @GetMapping("/{idUser}/search")
+    public ResponseEntity<Optional<List<Project>>> searchProjects(@PathVariable Long idUser,
+            @RequestParam String searchTerm) {
+        Optional<User> optionalUser = userRepository.findById(idUser);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+        try {
+            Optional<List<Project>> projects = projectRepository.findBySearchTerm(searchTerm, idUser);
+            return ResponseEntity.ok(projects);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 }

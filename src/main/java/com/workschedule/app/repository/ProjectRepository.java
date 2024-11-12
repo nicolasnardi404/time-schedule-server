@@ -24,4 +24,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("SELECT COUNT(p) > 0 FROM Project p WHERE p.user.id = :userId AND p.nameProject = :nameProject")
     boolean checkIfNameProjectIsUnique(@Param("userId") Long userId, @Param("nameProject") String nameProject);
 
+    @Query("SELECT p FROM Project p  WHERE p.user.id = :userId AND LOWER(p.nameProject) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+    Optional<List<Project>> findBySearchTerm(@Param("searchTerm") String searchTerm, @Param("userId") Long userId);
+
 }
