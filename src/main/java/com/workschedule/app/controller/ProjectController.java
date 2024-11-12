@@ -4,6 +4,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +26,7 @@ import com.workschedule.app.entity.Project;
 import com.workschedule.app.entity.User;
 import com.workschedule.app.repository.ProjectRepository;
 import com.workschedule.app.repository.UserRepository;
+import com.workschedule.app.service.ProjectService;
 
 import lombok.AllArgsConstructor;
 
@@ -32,6 +37,7 @@ public class ProjectController {
 
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectService projectService;
 
     @GetMapping("/{idUser}/all-projects")
     ResponseEntity<List<Project>> allProjectsPerUser(@PathVariable Long idUser) {
@@ -47,6 +53,35 @@ public class ProjectController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    @GetMapping("/{userId}/projects/count")
+    public ResponseEntity<Long> getCount(@PathVariable Long userId) {
+        try {
+            long totalCount = projectService.getTotalProjectsCount(userId);
+            return ResponseEntity.ok(totalCount);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @GetMapping("/{userId}/pagination")
+    public ResponseEntity<Page<Project>> getProjectsPagination(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+
+        Sort.Direction direction = sortDirection != null ? Sort.Direction.valueOf(sortDirection.toUpperCase())
+                : Sort.Direction.DESC;
+
+        PageRequest pageable = PageRequest.of(page, size, direction, sortBy != null ? sortBy : "id");
+
+        Page<Project> projects = projectService.getProjectsForUser(userId, pageable);
+
+        return ResponseEntity.ok(projects);
     }
 
     @GetMapping("/{idUser}/get-project/{idProject}")
