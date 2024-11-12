@@ -208,4 +208,34 @@ public class ActivityController {
                     .body(Map.of("message", "Failed to close activities"));
         }
     }
+
+    @GetMapping("/project/{projectId}/open")
+    public ResponseEntity<List<ActivityDTO>> getOpenActivities(@PathVariable Long projectId) {
+        List<Activity> activities = activityRepository.findAllByProjectIdAndIsClosed(projectId, false);
+        List<ActivityDTO> activityDTOs = activities.stream()
+                .map(activity -> ActivityDTO.builder()
+                        .id(activity.getId())
+                        .description(activity.getDescription())
+                        .beginning(activity.getBeginning())
+                        .end(activity.getEnd())
+                        .isClosed(activity.isClosed())
+                        .build())
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(activityDTOs);
+    }
+
+    @GetMapping("/project/{projectId}/closed")
+    public ResponseEntity<List<ActivityDTO>> getClosedActivities(@PathVariable Long projectId) {
+        List<Activity> activities = activityRepository.findAllByProjectIdAndIsClosed(projectId, true);
+        List<ActivityDTO> activityDTOs = activities.stream()
+                .map(activity -> ActivityDTO.builder()
+                        .id(activity.getId())
+                        .description(activity.getDescription())
+                        .beginning(activity.getBeginning())
+                        .end(activity.getEnd())
+                        .isClosed(activity.isClosed())
+                        .build())
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(activityDTOs);
+    }
 }

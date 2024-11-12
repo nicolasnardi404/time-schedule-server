@@ -11,4 +11,6 @@ import java.util.List;
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
     @Query("SELECT a FROM Activity a WHERE a.project.id = :projectId")
     List<Activity> findAllByProjectId(Long projectId);
+
+    List<Activity> findAllByProjectIdAndIsClosed(Long projectId, boolean isClosed);
 }
