@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import jakarta.persistence.Column;
 
 @Data
 @Builder
@@ -29,10 +30,11 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
+    @Column(unique = true)
     private String username;
     private String password;
-    
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
