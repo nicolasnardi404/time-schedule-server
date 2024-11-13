@@ -16,4 +16,5 @@ public class ActivityDTO {
     private Date beginning;
     private Date end;
     private String description;
-} 
+    private boolean isClosed;
+}
